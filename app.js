@@ -23,7 +23,7 @@ const db = admin.database()
 
 const manyOffices = {"USA": 7, "Europe": 15, "Germany": 2, "Poland": 4, "Ukraine": 7}
 const singleOffice = {"England": "London", "Bulgaria": "Sofia"}
-const framerURL = 'https://framer.cloud/BuOPt/'
+const framerURL = 'https://framer.cloud/SviNN'
 
 // DEFINE FUNCTIONS
 
@@ -31,8 +31,6 @@ const setValue = (ref, obj) => ref.update(obj)
 const matchEntities = (countries, param) => {
     return countries.hasOwnProperty(param)
 }
-
-// MAIN APP LOGIC
 
 app.fallback((conv) => {
     
@@ -51,8 +49,6 @@ app.fallback((conv) => {
         case 'openMap':
             setValue(ref, {countryName: 'all'})
             conv.ask(framerURL+'?id='+sessionId)
-            
-            // remove the session node in 10 min
             setTimeout(() => ref.remove(), nodeWipeTime)
             
         break;
@@ -78,7 +74,7 @@ app.fallback((conv) => {
             
             } else if (matchEntities(singleOffice, country)) {
 
-                setValue(ref, {countryName: 'Europe'})
+                setValue(ref, {countryName: country})
                 conv.ask(`There is only one office in ${singleOffice[country]}, ${country}. To get back say: show me all offices`)
            
             } else {
@@ -88,5 +84,7 @@ app.fallback((conv) => {
         break;
     }
 })
+
+// DEPLOY HTTP SERVER
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app)
