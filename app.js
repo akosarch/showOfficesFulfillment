@@ -58,6 +58,11 @@ app.fallback((conv) => {
             conv.close('See ya')
         break;
         
+        case 'filterDevCentres':
+            setValue(ref, {countryName: "development centres"})
+            conv.ask('There are 12 development centres in 3 countries. To get back say: show me all offices')
+        break;
+        
         case 'showOffices':
             
             const country = conv.parameters.countryName
