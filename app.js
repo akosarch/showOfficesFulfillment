@@ -35,11 +35,12 @@ const matchEntities = (countries, param) => {
 app.fallback((conv) => {
     
     const intent = conv.intent // catch the intent name
-    const sessionId = conv.contexts._session.split('/').splice(-1)[0]
-    const ref = db.ref(sessionId)
-    const nodeWipeTime = 1000 * 60 * 10
+    const sessionId = conv.contexts._session.split('/').splice(-1)[0] // extracting sessionId from the response
+    const ref = db.ref(sessionId) // set a session id as a reference node in DB
+    const nodeWipeTime = 1000 * 60 * 10 // set node wipe time to 10min
 
-    
+    // WATCHING FOR THE INTENT BEING TRIGGERED
+
     switch (intent) {
         
         case 'fallback':
@@ -47,49 +48,48 @@ app.fallback((conv) => {
         break;
 
         case 'openMap':
-            setValue(ref, {countryName: 'all'})
-            conv.ask(framerURL+'?id='+sessionId)
-            setTimeout(() => ref.remove(), nodeWipeTime)
+            setValue(ref, {countryName: 'all'}) // set default value to 'all'
+            conv.ask(framerURL+'?id='+sessionId) // respond with a map url
+            setTimeout(() => ref.remove(), nodeWipeTime) // node will de removed by the timeout
             
         break;
 
         case 'closeMap':
-            ref.remove()
+            ref.remove() // remove the node reference on bot exit
             conv.close('See ya')
         break;
         
         case 'filterDevCentres':
             setValue(ref, {countryName: "development centres"})
-            conv.ask('There are 12 development centres in 3 countries. To get back say: show me all offices')
+            conv.ask('There are 12 development locations in 3 countries. To get back say: show me all locations')
         break;
         
         case 'showOffices':
             
-            const country = conv.parameters.countryName
+            const country = conv.parameters["countryName"] // send it to the Framer client
+            const original = conv.parameters["originalName"] // use it in a voice response to the user
             
             if (country === "all") {
 
                 setValue(ref, {countryName: 'all'})
-                conv.ask('Here are all the Soft Serve offices')
+                conv.ask('Here are all the Soft Serve locations')
 
             } else if (matchEntities(manyOffices, country)) {
 
                 setValue(ref, {countryName: country})
-                conv.ask(`There are ${manyOffices[country]} offices in ${country}. To get back say: show me all offices`)
+                conv.ask(`There are ${manyOffices[country]} locations in ${original}. To get back say: show me all locations`)
             
             } else if (matchEntities(singleOffice, country)) {
 
                 setValue(ref, {countryName: country})
-                conv.ask(`There is only one office in ${singleOffice[country]}, ${country}. To get back say: show me all offices`)
+                conv.ask(`There is only one location in ${singleOffice[country]}, ${original}. To get back say: show me all locations`)
            
             } else {
-                conv.ask('There is no Soft Serve offices in that country')
+                conv.ask('There is no Soft Serve locations in that country')
             }
             
         break;
     }
 })
-
-// DEPLOY HTTP SERVER
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app)
